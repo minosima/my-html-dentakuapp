@@ -625,17 +625,25 @@
             calcResult = null;
             document.getElementById("calcDisplay").textContent = '0';
             calc.style.display = 'block';
-            const inputRect = input.getBoundingClientRect();
-            const calcRect = calc.getBoundingClientRect();
-            const overlap = (inputRect.bottom + calcRect.height) - window.innerHeight;
-            if (overlap > 0) {
-                // 下方向に余白＋10pxぶんスクロール
-                window.scrollBy({
-                    top: overlap + 10,
-                    behavior: "smooth"
-                });
-            }
+
+            // 少し遅らせて正しい位置・サイズを取得
+            setTimeout(() => {
+                adjustCalculatorPosition(); // ← 位置調整（左右揃え）
+
+                const inputRect = input.getBoundingClientRect();
+                const calcRect = calc.getBoundingClientRect();
+
+                // 下に電卓を置いたとき、画面外ならスクロール
+                const overlap = (inputRect.bottom + calcRect.height) - window.innerHeight;
+                if (overlap > 0) {
+                    window.scrollBy({
+                        top: overlap + 20,
+                        behavior: "smooth"
+                    });
+                }
+            }, 50); // ← 50ms 遅延がポイント（iOS Safari対策）
         }
+
 
         function adjustCalculatorPosition() {
             const calc = document.getElementById("floatingCalc");
