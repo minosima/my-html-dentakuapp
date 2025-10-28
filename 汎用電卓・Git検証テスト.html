@@ -625,30 +625,35 @@
             calcEvaluated = false;
             calcResult = null;
             document.getElementById("calcDisplay").textContent = '0';
-            calc.style.display = 'block';
 
-            // 入力欄と電卓の位置を取得
-            const rect = input.getBoundingClientRect();
+            // 一旦非表示状態で配置を確定させる
+            calc.style.display = 'block';
+            calc.style.visibility = 'hidden';
+
+            // 位置情報を取得（ここで高さ・幅が確定する）
+            const inputRect = input.getBoundingClientRect();
             const calcRect = calc.getBoundingClientRect();
 
-            // 電卓の位置を入力欄の直下に配置
-            let newTop = rect.bottom + window.scrollY + 5;
-            let newLeft = rect.left + window.scrollX;
+            // --- 基本：入力欄の直下に表示 ---
+            let newTop = inputRect.bottom + window.scrollY + 5;
+            let newLeft = inputRect.left + window.scrollX;
 
-            // 電卓が画面下にはみ出す場合は「上」に表示
+            // --- 下に収まらないときは上に表示 ---
             if (newTop + calcRect.height > window.scrollY + window.innerHeight) {
-                newTop = rect.top + window.scrollY - calcRect.height - 5;
+                newTop = inputRect.top + window.scrollY - calcRect.height - 5;
             }
 
-            // 電卓が画面右端にはみ出す場合の補正
+            // --- 右端にはみ出す場合は左に寄せる ---
             if (newLeft + calcRect.width > window.scrollX + window.innerWidth) {
                 newLeft = window.scrollX + window.innerWidth - calcRect.width - 5;
             }
 
-            // 計算結果を反映
+            // --- 最終位置を設定 ---
             calc.style.top = `${newTop}px`;
             calc.style.left = `${newLeft}px`;
+            calc.style.visibility = 'visible';
         }
+
 
 
 
