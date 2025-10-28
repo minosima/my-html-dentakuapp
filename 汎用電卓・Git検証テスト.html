@@ -618,6 +618,7 @@
            ----------------------------- */
         function showCalculator(input) {
             if (!input) return;
+
             activeInput = input;
             const calc = document.getElementById("floatingCalc");
             calcExpression = '';
@@ -626,23 +627,29 @@
             document.getElementById("calcDisplay").textContent = '0';
             calc.style.display = 'block';
 
-            // 少し遅らせて正しい位置・サイズを取得
-            setTimeout(() => {
-                adjustCalculatorPosition(); // ← 位置調整（左右揃え）
+            // 入力欄と電卓の位置を取得
+            const rect = input.getBoundingClientRect();
+            const calcRect = calc.getBoundingClientRect();
 
-                const inputRect = input.getBoundingClientRect();
-                const calcRect = calc.getBoundingClientRect();
+            // 電卓の位置を入力欄の直下に配置
+            let newTop = rect.bottom + window.scrollY + 5;
+            let newLeft = rect.left + window.scrollX;
 
-                // 下に電卓を置いたとき、画面外ならスクロール
-                const overlap = (inputRect.bottom + calcRect.height) - window.innerHeight;
-                if (overlap > 0) {
-                    window.scrollBy({
-                        top: overlap + 20,
-                        behavior: "smooth"
-                    });
-                }
-            }, 50); // ← 50ms 遅延がポイント（iOS Safari対策）
+            // 電卓が画面下にはみ出す場合は「上」に表示
+            if (newTop + calcRect.height > window.scrollY + window.innerHeight) {
+                newTop = rect.top + window.scrollY - calcRect.height - 5;
+            }
+
+            // 電卓が画面右端にはみ出す場合の補正
+            if (newLeft + calcRect.width > window.scrollX + window.innerWidth) {
+                newLeft = window.scrollX + window.innerWidth - calcRect.width - 5;
+            }
+
+            // 計算結果を反映
+            calc.style.top = `${newTop}px`;
+            calc.style.left = `${newLeft}px`;
         }
+
 
 
         function adjustCalculatorPosition() {
