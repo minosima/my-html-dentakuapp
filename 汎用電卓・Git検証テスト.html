@@ -618,44 +618,22 @@
            ----------------------------- */
         function showCalculator(input) {
             if (!input) return;
-
             activeInput = input;
             const calc = document.getElementById("floatingCalc");
             calcExpression = '';
             calcEvaluated = false;
             calcResult = null;
             document.getElementById("calcDisplay").textContent = '0';
-
-            // 一旦非表示状態で配置を確定させる
             calc.style.display = 'block';
-            calc.style.visibility = 'hidden';
 
-            // 位置情報を取得（ここで高さ・幅が確定する）
-            const inputRect = input.getBoundingClientRect();
+            adjustCalculatorPosition();
+            // スクロール調整（表示領域確保）
             const calcRect = calc.getBoundingClientRect();
-
-            // --- 基本：入力欄の直下に表示 ---
-            let newTop = inputRect.bottom + window.scrollY + 5;
-            let newLeft = inputRect.left + window.scrollX;
-
-            // --- 下に収まらないときは上に表示 ---
+            const newTop = window.scrollY + input.getBoundingClientRect().bottom + 5;
             if (newTop + calcRect.height > window.scrollY + window.innerHeight) {
-                newTop = inputRect.top + window.scrollY - calcRect.height - 5;
+                window.scrollBy({ top: (newTop + calcRect.height) - (window.scrollY + window.innerHeight) + 10, behavior: 'smooth' });
             }
-
-            // --- 右端にはみ出す場合は左に寄せる ---
-            if (newLeft + calcRect.width > window.scrollX + window.innerWidth) {
-                newLeft = window.scrollX + window.innerWidth - calcRect.width - 5;
-            }
-
-            // --- 最終位置を設定 ---
-            calc.style.top = `${newTop}px`;
-            calc.style.left = `${newLeft}px`;
-            calc.style.visibility = 'visible';
         }
-
-
-
 
         function adjustCalculatorPosition() {
             const calc = document.getElementById("floatingCalc");
@@ -898,5 +876,7 @@
         document.addEventListener('dblclick', e => e.preventDefault());   
         
     </script>
+    <!-- ダミーの空白領域 -->
+    <div style="height: 200px;"></div>
 </body>
 </html>
