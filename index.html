@@ -320,19 +320,19 @@
     <div id="floatingCalc">
         <div id="calcDisplay">0</div>
         <div id="calcButtons">
-            <button>7</button>
-            <button>8</button>
-            <button>9</button>
-            <button>/</button>
-            <button>4</button>
-            <button>5</button>
-            <button>6</button>
-            <button>*</button>
-            <button>1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>-</button>
-            <button>0</button>
+            <button>７</button>
+            <button>８</button>
+            <button>９</button>
+            <button>÷</button>
+            <button>４</button>
+            <button>５</button>
+            <button>６</button>
+            <button>×</button>
+            <button>１</button>
+            <button>２</button>
+            <button>３</button>
+            <button>－</button>
+            <button>０</button>
             <button>.</button>
             <button>C</button>
             <button>＋</button>
@@ -693,20 +693,31 @@
 
         function calculateExpression() {
             try {
-                // シンプルに eval を使う（既存仕様を尊重）
-                // 入力が不正な場合は例外を投げる
-                calcResult = eval(calcExpression);
+                // ★ 全角 → 半角変換（数字・記号すべて）
+                const normalizedExpression = calcExpression.replace(/[！-～]/g, ch =>
+                    String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+                )
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/－/g, '-')
+                .replace(/＋/g, '+')
+                .replace(/，/g, ',')
+                .replace(/．/g, '.');
+
+                // 計算を実行（evalに渡すのは正規化済みの式）
+                calcResult = eval(normalizedExpression);
+
+                // ★ 表示は「元の式（全角含む）」＋「＝結果」
                 document.getElementById("calcDisplay").textContent = `${calcExpression} = ${calcResult}`;
+
+                // ★ calcExpressionは壊さず保持（次の入力ボタンで式が残る）
                 calcEvaluated = true;
+
             } catch (err) {
                 document.getElementById("calcDisplay").textContent = '式エラー';
                 calcEvaluated = false;
             }
         }
-
-
-
-
 
         function applyToInput() {
             if (!activeInput) return;
@@ -786,16 +797,29 @@
                 input.parentNode.appendChild(note);
             }
 
-            // 式に四則演算子（+ - * /）が含まれているか判定
-            const hasOperator = /[+\-*/]/.test(expression);
+            // 全角数字・演算子を半角に統一
+            const normalizedExpr = expression.replace(/[！-～]/g, ch =>
+                String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+            )
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/－/g, '-')
+            .replace(/＋/g, '+')
+            .replace(/，/g, ',')
+            .replace(/．/g, '.');
 
-            // 含まれていれば「式 = 結果」、なければ「結果のみ」
+            // 四則演算子が含まれているか判定
+            const hasOperator = /[+\-*/]/.test(normalizedExpr);
+
             if (hasOperator) {
-                note.textContent = `${expression} = ${result}`;
+                // 表示用に * → ×, / → ÷ に戻す
+                const displayExpr = normalizedExpr.replace(/\*/g, '×').replace(/\//g, '÷');
+                note.textContent = `${displayExpr} = ${result}`;
             } else {
                 note.textContent = `${result}`;
             }
         }
+
 
         /* -----------------------------
            ログ管理
