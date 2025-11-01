@@ -859,10 +859,9 @@
                     logContainer.style.display = 'none';
                 }
             });
-
-            li.appendChild(span);
-            li.appendChild(copyBtn);
             li.appendChild(delBtn);
+            li.appendChild(copyBtn);
+            li.appendChild(span);
 
             // 先頭に追加（最新が上）
             logList.insertBefore(li, logList.firstChild);
