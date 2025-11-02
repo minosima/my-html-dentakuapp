@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汎用コスト計算</title>
+<style>
+    body {
+        touch-action: manipulation;
+        font-family: sans-serif;
+        background: #f0f0f0;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .calculator { width: 100%; max-width: 420px; margin: 0 auto; }
+    .sectionA { background-color: #e3f2fd; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px; }
+    .input-group { display:flex; align-items:center; gap:15px; }
+    .input-group label { flex:0 0 100px; color:#1565c0; font-weight:bold; text-align:left; }
+    .input-container { flex:1; }
+    .input-container input { width:100%; border:2px solid #90caf9; background:#fff; padding:6px; border-radius:4px; font-size:17px; box-sizing:border-box; text-align:right; touch-action: manipulation; }
+
+    button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
+    #calculate-btn { font-size:20px; padding:12px 30px; background:#ff5722; color:#fff; border:none; border-radius:8px; cursor:pointer; transition:0.3s; }
+    #calculate-btn:hover { background:#f4511e; }
+
+    #result { margin-top:20px; font-size:18px; color:#333; text-align:left; }
+    .resultA { color:#1565c0; }
+
+    /* ログ */
+    #logContainer { max-width:420px; margin:20px auto 0; text-align:left; display:none; }
+    #logHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    #calcLog { list-style:none; padding:0; margin:0; }
+    #calcLog li { background:#fff; border:1px solid #ccc; border-radius:4px; padding:8px; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+    .logText { flex:1; margin-right:8px; word-break:break-all; }
+    .logBtn { font-size:14px; font-weight:bold; padding:4px 8px; border:none; border-radius:4px; margin-left:4px; cursor:pointer; }
+    .logBtn.copy { background:#e3f2fd; color:#1565c0; }
+    .logBtn.delete { background:#ffebee; color:#c62828; }
+    #calcLog li.placeholder-log .logBtn { display:none; }
+
+    .formula-note { font-style:italic; font-size:14px; color:#777; margin-top:4px; text-align:left; }
+
+    /* 電卓 */
+    #floatingCalc {
+        display:none; position:absolute; z-index:1000; background:#fff; padding:20px; max-width:360px; max-height:500px; border-radius:10px;
+        font-weight:600; border-top:1px solid #fff; border-left:18px solid #fff; border-right:18px solid #fff; border-bottom:64px solid #fff;
+        transform-origin: top center;
+    }
+    #calcDisplay { font-size:22px; font-weight:bold; margin-bottom:0; text-align:right; min-width:120px; }
+    #calcButtons { display:grid; grid-template-columns:repeat(4,1fr); column-gap:10px; row-gap:6px; }
+    #calcButtons button, #calcApply button { height:40px; font-size:20px; font-weight:bold; background:#e3f2fd; border:none; border-radius:4px; color:#1565c0; cursor:pointer; display:flex; justify-content:center; align-items:center; }
+    #calcApply { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px; width:100%; }
+    #calcApply > button#apply { grid-column:3/ span 2; background:#ff9800; color:#fff; }
+
+    /* モーダル */
+    #customConfirmModal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4); }
+    #customConfirmModal > div { background:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:80%; max-width:300px; border-radius:8px; }
+    #customConfirmModal p { font-size:16px; font-weight:bold; }
+    #customConfirmModal button { padding:8px 16px; }
+
+    /* トースト */
+    #toast { visibility:hidden; min-width:160px; background:#323232; color:#fff; text-align:center; border-radius:8px; padding:10px; position:fixed; z-index:2000; left:50%; bottom:40px; transform:translateX(-50%); font-size:16px; opacity:0; transition: opacity 0.4s, bottom 0.4s; }
+    #toast.show { visibility:visible; opacity:0.95; bottom:60px; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+    <h2>汎用コスト計算</h2>
+    <div class="sectionA">
+        <div class="input-group">
+            <label for="nameA">商品名</label>
+            <div class="input-container"><input type="text" id="nameA" placeholder="任意"></div>
+        </div>
+        <div class="input-group">
+            <label for="priceA">価　格</label>
+            <div class="input-container"><input type="number" id="priceA"></div>
+        </div>
+        <div class="input-group">
+            <label for="volumeA">本体量</label>
+            <div class="input-container"><input type="number" id="volumeA"></div>
+        </div>
+        <div class="input-group">
+            <label for="usageA">使用量</label>
+            <div class="input-container"><input type="number" id="usageA" value="1"></div>
+        </div>
+    </div>
+    <button id="calculate-btn">計算する</button>
+    <div id="result"></div>
+</div>
+
+<div id="floatingCalc">
+    <div id="calcDisplay">0</div>
+    <div id="calcButtons">
+        <button>７</button><button>８</button><button>９</button><button>÷</button>
+        <button>４</button><button>５</button><button>６</button><button>×</button>
+        <button>１</button><button>２</button><button>３</button><button>－</button>
+        <button>０</button><button>.</button><button>C</button><button>＋</button>
+    </div>
+    <div id="calcApply">
+        <button id="equals">=</button>
+        <div class="spacer"></div>
+        <button id="apply">入力</button>
+    </div>
+</div>
+
+<div id="logContainer">
+    <div id="logHeader">
+        <h3>計算ログ</h3>
+        <div id="logActions">
+            <button id="copyAllLogs" class="logBtn copy">全コピー</button>
+            <button id="clearAllLogs" class="logBtn delete" type="button">全クリア</button>
+        </div>
+    </div>
+    <ul id="calcLog"></ul>
+</div>
+
+<div id="customConfirmModal">
+    <div>
+        <p>計算ログをすべてクリアしますか？</p>
+        <div style="display:flex; justify-content:space-around; margin-top:20px;">
+            <button id="confirmYes" class="logBtn delete">はい</button>
+            <button id="confirmNo" class="logBtn copy">いいえ</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" aria-live="polite" role="status">コピーしました</div>
+
+<div style="height:1000px;"></div>
+
+<script>
+/* -----------------------------
+   共通関数
+----------------------------- */
+function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+function copyTextToClipboard(text) {
+    if (!text || !text.trim()) { showToast('ログがありません'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(()=>showToast('コピーしました'))
+        .catch(()=>showToast(fallbackCopyByExec(text)?'コピーしました':'コピーに失敗しました'));
+    } else { showToast(fallbackCopyByExec(text)?'コピーしました':'コピーに失敗しました'); }
+}
+function fallbackCopyByExec(text){
+    try{
+        const ta=document.createElement('textarea'); ta.value=text;
+        ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        const ok=document.execCommand('copy'); document.body.removeChild(ta); return !!ok;
+    }catch{return false;}
+}
+
+function normalizeExpression(expr){
+    return expr.replace(/[！-～]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0))
+               .replace(/×/g,'*').replace(/÷/g,'/').replace(/－/g,'-').replace(/＋/g,'+')
+               .replace(/，/g,',').replace(/．/g,'.');
+}
+
+function moveToNextInput(currentInput){
+    const inputs=Array.from(document.querySelectorAll(".sectionA input"));
+    const idx=inputs.indexOf(currentInput);
+    if(idx>-1 && idx<inputs.length-1){
+        const next=inputs[idx+1];
+        setTimeout(()=>{ next.focus(); if(next.type==='number') showCalculator(next); },0);
+    }
+}
+
+/* -----------------------------
+   電卓
+----------------------------- */
+let calcExpression='', calcEvaluated=false, calcResult=null, activeInput=null;
+
+function press(value){
+    if(calcEvaluated){ calcExpression=''; calcEvaluated=false; }
+    calcExpression+=value;
+    document.getElementById("calcDisplay").textContent=calcExpression;
+}
+function clearCalc(){
+    calcExpression=''; calcEvaluated=false; calcResult=null;
+    document.getElementById("calcDisplay").textContent='0';
+    if(activeInput){ activeInput.value=''; removeFormulaBelow(activeInput); }
+}
+function calculateExpression(){
+    try{
+        const normalized=normalizeExpression(calcExpression);
+        calcResult=eval(normalized);
+        document.getElementById("calcDisplay").textContent=`${calcExpression} = ${calcResult}`;
+        calcEvaluated=true;
+    }catch{ document.getElementById("calcDisplay").textContent='式エラー'; calcEvaluated=false; }
+}
+function applyToInput(){
+    temporarilyDisableAllButtons(500);
+    if(!activeInput) return;
+
+    if(!calcExpression.trim()){ 
+        document.getElementById("floatingCalc").style.display="none"; activeInput=null; moveToNextInput(activeInput); return;
+    }
+
+    if(!calcEvaluated) calculateExpression();
+    if(calcEvaluated && !isNaN(calcResult)){ activeInput.value=calcResult; showFormulaBelow(activeInput, calcExpression, calcResult);}
+    else removeFormulaBelow(activeInput);
+
+    document.getElementById("floatingCalc").style.display="none";
+    const currentInput=activeInput; activeInput=null;
+    moveToNextInput(currentInput);
+}
+
+function showCalculator(input){
+    if(!input) return;
+    activeInput=input; calcExpression=''; calcEvaluated=false; calcResult=null;
+    document.getElementById("calcDisplay").textContent='0';
+    const calc=document.getElementById("floatingCalc");
+    calc.style.display='block';
+    adjustCalculatorPosition();
+    const rect=calc.getBoundingClientRect();
+    const newTop=window.scrollY+input.getBoundingClientRect().bottom+5;
+    if(newTop+rect.height>window.scrollY+window.innerHeight){
+        window.scrollBy({top:(newTop+rect.height)-(window.scrollY+window.innerHeight)+10, behavior:'smooth'});
+    }
+}
+
+function adjustCalculatorPosition(){
+    const calc=document.getElementById('floatingCalc'); if(!calc||!activeInput) return;
+    const grp=activeInput.closest('.input-group'); const rect=grp?grp.getBoundingClientRect():activeInput.getBoundingClientRect();
+    const scrollY=window.scrollY||document.documentElement.scrollTop;
+    const scrollX=window.scrollX||document.documentElement.scrollLeft;
+    const top=scrollY+rect.bottom+5; const left=scrollX+rect.left+(rect.width/2)-(calc.offsetWidth/2);
+    calc.style.top=`${top}px`; calc.style.left=`${left}px`; calc.style.display='block';
+}
+
+function showFormulaBelow(input, expr, result){
+    let note=input.nextElementSibling;
+    if(!note||!note.classList.contains("formula-note")){
+        note=document.createElement('div'); note.className='formula-note'; input.parentNode.appendChild(note);
+    }
+    const normalized=normalizeExpression(expr);
+    note.textContent=/[+\-*/]/.test(normalized)?normalized.replace(/\*/g,'×').replace(/\//g,'÷')+` = ${result}`:result;
+}
+
+function removeFormulaBelow(input){
+    const note=input.nextElementSibling; if(note&&note.classList.contains("formula-note")) note.remove();
+}
+
+/* -----------------------------
+   ログ管理
+----------------------------- */
+function addLog(text){
+    const logList=document.getElementById('calcLog'); const logContainer=document.getElementById('logContainer');
+    logContainer.style.display='block';
+    const li=document.createElement('li');
+    const span=document.createElement('span'); span.className='logText'; span.textContent=text;
+    const copyBtn=document.createElement('button'); copyBtn.className='logBtn copy'; copyBtn.textContent='コピー';
+    copyBtn.addEventListener('click',()=>copyTextToClipboard(span.textContent));
+    const delBtn=document.createElement('button'); delBtn.className='logBtn delete'; delBtn.textContent='削除';
+    delBtn.addEventListener('click',()=>{ li.remove(); if(logList.querySelectorAll('li').length===0) logContainer.style.display='none'; });
+    li.append(span, copyBtn, delBtn);
+    logList.insertBefore(li, logList.firstChild);
+}
+
+/* -----------------------------
+   計算処理
+----------------------------- */
+function calculate(){
+    const name=document.getElementById('nameA').value.trim()||'商品A';
+    const v=parseFloat(document.getElementById('volumeA').value);
+    const u=parseFloat(document.getElementById('usageA').value);
+    const p=parseFloat(document.getElementById('priceA').value);
+    let output='', logText='';
+    if(v>0 && u>0 && p>=0 && !isNaN(v) && !isNaN(u) && !isNaN(p)){
+        const cost=p*(u/v);
+        output=`<div class="resultA"><strong>${name}</strong><br>1回のコスト：${cost.toFixed(2)} 円</div>`;
+        logText=`${name}: ${p} 円 ÷ ${v} × ${u} = ${cost.toFixed(2)} 円`;
+    } else {
+        output=`<div class="resultA">${name}の入力が不完全です</div>`;
+        logText=`${name}の入力が不完全です`;
+    }
+    document.getElementById('result').innerHTML=output;
+    addLog(logText);
+}
+
+/* -----------------------------
+   一時的ボタン無効化
+----------------------------- */
+function temporarilyDisableAllButtons(ms){
+    document.querySelectorAll('button').forEach(btn=>btn.disabled=true);
+    setTimeout(()=>document.querySelectorAll('button').forEach(btn=>btn.disabled=false), ms||200);
+}
+
+/* -----------------------------
+   初期イベント
+----------------------------- */
+document.getElementById('calculate-btn').addEventListener('click', calculate);
+
+document.querySelectorAll('.sectionA input').forEach(input=>{
+    input.addEventListener('focus',()=>{ if(input.type==='number') showCalculator(input); });
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); moveToNextInput(input); } });
+});
+
+document.querySelectorAll('#calcButtons button').forEach(btn=>{
+    btn.addEventListener('click',()=>{ const val=btn.textContent; if(val==='C') clearCalc(); else press(val); });
+});
+
+document.getElementById('equals').addEventListener('click', calculateExpression);
+document.getElementById('apply').addEventListener('click', applyToInput);
+
+/* ログ全コピー */
+document.getElementById('copyAllLogs').addEventListener('click', ()=>{
+    const logs=Array.from(document.querySelectorAll('#calcLog .logText')).map(sp=>sp.textContent).join('\n');
+    copyTextToClipboard(logs);
+});
+/* ログ全クリア */
+document.getElementById('clearAllLogs').addEventListener('click', ()=>document.getElementById('customConfirmModal').style.display='block');
+document.getElementById('confirmNo').addEventListener('click', ()=>document.getElementById('customConfirmModal').style.display='none');
+document.getElementById('confirmYes').addEventListener('click', ()=>{
+    document.getElementById('calcLog').innerHTML='';
+    document.getElementById('logContainer').style.display='none';
+    document.getElementById('customConfirmModal').style.display='none';
+});
+
+/* ウィンドウリサイズ/スクロールで電卓再調整 */
+window.addEventListener('resize', adjustCalculatorPosition);
+window.addEventListener('scroll', adjustCalculatorPosition);
+</script>
+</body>
+</html>
