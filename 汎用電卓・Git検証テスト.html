@@ -643,12 +643,21 @@
 
             adjustCalculatorPosition();
             // スクロール調整（表示領域確保）
-            const calcRect = calc.getBoundingClientRect();
-            const newTop = window.scrollY + input.getBoundingClientRect().bottom + 5;
-            if (newTop + calcRect.height > window.scrollY + window.innerHeight) {
-                window.scrollBy({ top: (newTop + calcRect.height) - (window.scrollY + window.innerHeight) + 10, behavior: 'smooth' });
-            }
+            setTimeout(() => {
+                const inputRect = input.getBoundingClientRect();
+                const calcRect = calc.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                const visibleBottom = window.scrollY + viewportHeight;
+                const calcBottom = window.scrollY + inputRect.bottom + 10 + calcRect.height;
+
+                // 電卓下部が見切れている場合に十分スクロールする
+                if (calcBottom > visibleBottom) {
+                    const scrollAmount = (calcBottom - visibleBottom) + 40; // ← 余裕をもって40px多くスクロール
+                    window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+                }
+            }, 50); // レイアウト確定後に実行
         }
+
 
         function adjustCalculatorPosition() {
 
