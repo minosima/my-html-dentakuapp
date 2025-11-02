@@ -100,24 +100,7 @@ function applyToInput(){
     if(!calcEvaluated) calculateExpression();
     if(calcEvaluated && !isNaN(calcResult)) activeInput.value=calcResult;
     document.getElementById('floatingCalc').style.display='none'; activeInput=null;
-}
-
-
-// 商品名入力後に Enter キーで価格欄に移動して電卓を表示
-document.getElementById('nameA').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.keyCode === 13) {
-        e.preventDefault();
-
-        const nextInput = document.getElementById('priceA');
-        if (!nextInput) return;
-
-        // 次の入力欄にフォーカスは当てずに電卓だけ表示
-        if (typeof showCalculator === 'function') {
-            showCalculator(nextInput);
-        }
-    }
-});
-  
+}  
 
 
   
@@ -137,7 +120,29 @@ document.getElementById('calculate-btn').addEventListener('click',()=>{
     } else { output=`<div class="resultA">${nameA}の入力が不完全です</div>`; logText=`${nameA}の入力が不完全です`; }
     document.getElementById('result').innerHTML=output;
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // ...既存の clear / copy / calculate / 電卓イベント登録 ...
+
+    // 商品名入力後に Enter キーで価格欄に移動して電卓を表示
+    document.getElementById('nameA').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            const nextInput = document.getElementById('priceA');
+            if (!nextInput) return;
+
+            // キーボードは出さずに電卓だけ表示
+            if (typeof showCalculator === 'function') {
+                showCalculator(nextInput);
+            }
+        }
+    });
+
+}); // ← DOMContentLoaded 終了
+
+  
 </script>
 </body>
 </html>
+
 
