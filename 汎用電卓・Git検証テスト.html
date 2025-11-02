@@ -564,8 +564,9 @@
                     // showCalculator expects the input element
                     showCalculator(evt.target || input);
                 };
-                input.addEventListener('pointerdown', activateCalc);
                 input.addEventListener('touchstart', activateCalc, { passive: false });
+                input.addEventListener('mousedown', activateCalc);
+
                 // ブラウザのフォーカスでキーボードが出るのを防ぐ
                 input.addEventListener('focus', (e) => e.target.blur());
             });
