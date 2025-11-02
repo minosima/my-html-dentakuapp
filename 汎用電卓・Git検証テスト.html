@@ -141,22 +141,25 @@
         }
 
         /* 電卓ポップアップ */
+
         #floatingCalc {
             display: none;
             position: absolute;
             z-index: 1000;
             background: #fff;
-            /* 左右だけ太めの枠線に変更 */
-            border-left: 30px solid #FFFFFF;
-            border-right: 30px solid #FFFFFF;;
-            border-top: 1px solid #ccc;
-            border-bottom: 300px solid #FFFFFF;
-
-            padding: 10px;
-            border-radius: 8px;
-            max-width: 280px;
+            border-left: 6px solid #FFFFFF;
+            border-right: 6px solid #FFFFFF;
+            border-bottom: 24px solid #FFFFFF;
+            border-top: 1px solid #FFFFFF;
+            
+            /* ↓↓↓ ここを拡大 ↓↓↓ */
+            padding: 20px;       /* 内側の余白を増やす（広く見せる） */
+            max-width: 360px;    /* 電卓全体の横幅を広げる */
+            max-height: 500px;  /* 縦方向の上限を指定 */            
+            border-radius: 10px;
             font-weight: 600;
         }
+
 
 
         #calcDisplay {
@@ -912,6 +915,3 @@
     <div style="height: 1000px;"></div>
 </body>
 </html>
-
-
-
