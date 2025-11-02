@@ -284,7 +284,10 @@
             flex: 1;
         }
 
-
+        #floatingCalc {
+            position: absolute;
+            transform-origin: top center;
+        }
                 
     </style>
 </head>
@@ -646,46 +649,24 @@
             }
         }
 
-
         function adjustCalculatorPosition() {
-            const calc = document.getElementById("floatingCalc");
-            if (calc.style.display !== "block" || !activeInput) return;
 
-            const rect = activeInput.getBoundingClientRect();
-            const parentRect = activeInput.closest(".input-group").getBoundingClientRect();
-            const calcRect = calc.getBoundingClientRect();
+                window.addEventListener('resize', adjustCalculatorPosition);
+                window.addEventListener('scroll', adjustCalculatorPosition);
 
-            // 現在と同じ縦位置（入力欄のすぐ下）
-            let newTop = window.scrollY + rect.bottom + 5;
-
-            // 入力名称と入力欄を含む .input-group の中央に電卓を配置
-            let newLeft = window.scrollX + parentRect.left + (parentRect.width - calcRect.width) / 2;
-
-            // 画面外にはみ出さないよう調整
-            if (newLeft < window.scrollX + 5) newLeft = window.scrollX + 5;
-            if (newLeft + calcRect.width > window.scrollX + window.innerWidth - 5) {
-                newLeft = window.scrollX + window.innerWidth - calcRect.width - 5;
-            }
-
-            calc.style.top = `${newTop}px`;
-            calc.style.left = `${newLeft}px`;
+                // 外部クリックで電卓を閉じる
+                document.addEventListener('click', (e) => {
+                    const calc = document.getElementById('floatingCalc');
+                    if (!calc) return;
+                    if (calc.style.display !== 'block') return;
+                    const tgt = e.target;
+                    if (calc.contains(tgt)) return;
+                    // 入力欄がクリックされたら閉じない
+                    if (tgt.tagName === 'INPUT' && tgt.type === 'number') return;
+                    calc.style.display = 'none';
+                    activeInput = null;
+                });
         }
-
-        window.addEventListener('resize', adjustCalculatorPosition);
-        window.addEventListener('scroll', adjustCalculatorPosition);
-
-        // 外部クリックで電卓を閉じる
-        document.addEventListener('click', (e) => {
-            const calc = document.getElementById('floatingCalc');
-            if (!calc) return;
-            if (calc.style.display !== 'block') return;
-            const tgt = e.target;
-            if (calc.contains(tgt)) return;
-            // 入力欄がクリックされたら閉じない
-            if (tgt.tagName === 'INPUT' && tgt.type === 'number') return;
-            calc.style.display = 'none';
-            activeInput = null;
-        });
 
         /* -----------------------------
            電卓内部ロジック
