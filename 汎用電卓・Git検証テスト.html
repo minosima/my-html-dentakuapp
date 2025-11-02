@@ -643,25 +643,28 @@
             document.getElementById("calcDisplay").textContent = '0';
             calc.style.display = 'block';
 
-            // 入力欄とスクロール位置を取得
-            const rect = input.getBoundingClientRect();
+            // 親 .input-group（ラベル＋入力欄 全体のブロック）を取得
+            const group = input.closest('.input-group');
+            const rect = group ? group.getBoundingClientRect() : input.getBoundingClientRect();
+
             const scrollY = window.scrollY || document.documentElement.scrollTop;
             const scrollX = window.scrollX || document.documentElement.scrollLeft;
 
-            // 電卓サイズ取得（未描画でも対応）
+            // 電卓サイズ取得
             const calcWidth = calc.offsetWidth || 320;
 
-            // 入力欄中央に合わせて直下に配置
+            // --- 横位置：ラベル＋入力欄全体の中央に配置 ---
             const left = scrollX + rect.left + (rect.width / 2) - (calcWidth / 2);
-            const top = scrollY + rect.bottom + 8; // ← 常に直下、上には出ない
 
-            // 計算結果反映
+            // --- 縦位置：入力欄ブロックの直下（8px余白） ---
+            const top = scrollY + rect.bottom + 8;
+
             calc.style.left = `${left}px`;
             calc.style.top = `${top}px`;
             calc.style.position = 'absolute';
             calc.style.zIndex = 1000;
 
-            // 位置追従（リサイズ・スクロール時）
+            // 位置追従
             window.addEventListener('resize', () => {
                 if (activeInput) showCalculator(activeInput);
             }, { once: true });
@@ -669,6 +672,7 @@
                 if (activeInput) showCalculator(activeInput);
             }, { once: true });
         }
+
 
         // --- 電卓以外をタップまたはクリックしたら閉じる ---
         function handleOutsideClose(e) {
