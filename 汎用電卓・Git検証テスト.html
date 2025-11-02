@@ -631,6 +631,7 @@
         /* -----------------------------
            電卓表示・位置調整
            ----------------------------- */
+
         function showCalculator(input) {
             if (!input) return;
             activeInput = input;
@@ -641,14 +642,37 @@
             document.getElementById("calcDisplay").textContent = '0';
             calc.style.display = 'block';
 
-            adjustCalculatorPosition();
-            // スクロール調整（表示領域確保）
+            // 入力欄の位置とサイズを取得
+            const inputRect = input.getBoundingClientRect();
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+            // 電卓の幅を取得
             const calcRect = calc.getBoundingClientRect();
-            const newTop = window.scrollY + input.getBoundingClientRect().bottom + 5;
-            if (newTop + calcRect.height > window.scrollY + window.innerHeight) {
-                window.scrollBy({ top: (newTop + calcRect.height) - (window.scrollY + window.innerHeight) + 10, behavior: 'smooth' });
+            const calcWidth = calcRect.width || 320;
+
+            // 入力欄の中央に合わせて配置
+            const left = scrollLeft + inputRect.left + (inputRect.width / 2) - (calcWidth / 2);
+            const top = scrollTop + inputRect.bottom + 8; // 下に少し余白を空ける
+
+            // 電卓の位置を設定
+            calc.style.left = `${left}px`;
+            calc.style.top = `${top}px`;
+
+            // 画面外にはみ出た場合の補正
+            const bodyWidth = document.body.clientWidth;
+            if (left + calcWidth > bodyWidth - 10) {
+                calc.style.left = `${bodyWidth - calcWidth - 10}px`;
             }
+            if (left < 10) {
+                calc.style.left = '10px';
+            }
+
+            // スクロールやリサイズに追従
+            window.addEventListener('scroll', () => showCalculator(activeInput), { once: true });
+            window.addEventListener('resize', () => showCalculator(activeInput), { once: true });
         }
+
 
         function adjustCalculatorPosition() {
 
