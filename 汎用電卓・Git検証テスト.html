@@ -382,6 +382,18 @@
     <div id="toast" aria-live="polite" role="status">コピーしました</div>
 
     <script>
+        // 電卓”入力ボタン押下後一定時間全ボタン無効化”500=0.5秒    
+        function temporarilyDisableAllButtons(duration = 200) {
+            const allButtons = document.querySelectorAll("button");
+            allButtons.forEach(btn => btn.disabled = true);
+            setTimeout(() => {
+                allButtons.forEach(btn => btn.disabled = false);
+            }, duration);
+        }
+        
+    
+    
+    
         /* -----------------------------
            トースト（軽い通知）
            ----------------------------- */
@@ -650,23 +662,38 @@
         }
 
         function adjustCalculatorPosition() {
+            const calc = document.getElementById('floatingCalc');
+            if (!calc || !activeInput) return;
 
-                window.addEventListener('resize', adjustCalculatorPosition);
-                window.addEventListener('scroll', adjustCalculatorPosition);
+            // 入力欄の位置を取得
+            const inputRect = activeInput.getBoundingClientRect();
 
-                // 外部クリックで電卓を閉じる
-                document.addEventListener('click', (e) => {
-                    const calc = document.getElementById('floatingCalc');
-                    if (!calc) return;
-                    if (calc.style.display !== 'block') return;
-                    const tgt = e.target;
-                    if (calc.contains(tgt)) return;
-                    // 入力欄がクリックされたら閉じない
-                    if (tgt.tagName === 'INPUT' && tgt.type === 'number') return;
-                    calc.style.display = 'none';
-                    activeInput = null;
-                });
+            // 電卓の座標を「入力欄の真下中央」に配置
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            const scrollX = window.scrollX || document.documentElement.scrollLeft;
+            const calcTop = scrollY + inputRect.bottom + 5; // 入力欄のすぐ下に
+            const calcLeft = scrollX + inputRect.left + (inputRect.width / 2) - (calc.offsetWidth / 2);
+
+            calc.style.top = `${calcTop}px`;
+            calc.style.left = `${calcLeft}px`;
+            calc.style.display = 'block';
         }
+
+        // イベント登録（リサイズやスクロールで位置を自動調整）
+        window.addEventListener('resize', adjustCalculatorPosition);
+        window.addEventListener('scroll', adjustCalculatorPosition);
+
+        // 外部クリックで電卓を閉じる（showCalculator内から削除してOK）
+        document.addEventListener('click', (e) => {
+            const calc = document.getElementById('floatingCalc');
+            if (!calc || calc.style.display !== 'block') return;
+            if (calc.contains(e.target)) return;
+            if (e.target.tagName === 'INPUT' && e.target.type === 'number') return;
+            calc.style.display = 'none';
+            activeInput = null;
+        });
+
+
 
         /* -----------------------------
            電卓内部ロジック
@@ -720,6 +747,8 @@
         }
 
         function applyToInput() {
+            // ✅ 入力ボタン押下時に全ボタンを一時無効化
+            temporarilyDisableAllButtons(500);
             if (!activeInput) return;
 
             // 未入力（テンキー押してない）ならスキップして次へ
