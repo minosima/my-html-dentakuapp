@@ -147,8 +147,8 @@
             position: absolute;
             z-index: 1000;
             background: #fff;
-            border-left: 6px solid #FFFFFF;
-            border-right: 6px solid #FFFFFF;
+            border-left: 18px solid #FFFFFF;
+            border-right: 18px solid #FFFFFF;
             border-bottom: 64px solid #FFFFFF;
             border-top: 1px solid #FFFFFF;
             
@@ -646,19 +646,27 @@
             }
         }
 
+
         function adjustCalculatorPosition() {
             const calc = document.getElementById("floatingCalc");
             if (calc.style.display !== "block" || !activeInput) return;
+
             const rect = activeInput.getBoundingClientRect();
+            const parentRect = activeInput.closest(".input-group").getBoundingClientRect();
             const calcRect = calc.getBoundingClientRect();
+
+            // 現在と同じ縦位置（入力欄のすぐ下）
             let newTop = window.scrollY + rect.bottom + 5;
-            let newLeft = window.scrollX + rect.right - calcRect.width;
-            if (newTop + calcRect.height > window.innerHeight + window.scrollY) {
-                newTop = window.scrollY + window.innerHeight - calcRect.height - 5;
+
+            // 入力名称と入力欄を含む .input-group の中央に電卓を配置
+            let newLeft = window.scrollX + parentRect.left + (parentRect.width - calcRect.width) / 2;
+
+            // 画面外にはみ出さないよう調整
+            if (newLeft < window.scrollX + 5) newLeft = window.scrollX + 5;
+            if (newLeft + calcRect.width > window.scrollX + window.innerWidth - 5) {
+                newLeft = window.scrollX + window.innerWidth - calcRect.width - 5;
             }
-            if (newLeft < window.scrollX) {
-                newLeft = window.scrollX + rect.left;
-            }
+
             calc.style.top = `${newTop}px`;
             calc.style.left = `${newLeft}px`;
         }
