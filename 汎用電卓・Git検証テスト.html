@@ -669,17 +669,19 @@
                 if (activeInput) showCalculator(activeInput);
             }, { once: true });
         }
-        // --- 電卓以外をクリックしたら閉じる ---
-        document.addEventListener('click', function (e) {
+
+        // --- 電卓以外をタップまたはクリックしたら閉じる ---
+        function handleOutsideClose(e) {
             const calc = document.getElementById("floatingCalc");
             if (!calc) return;
-
-            // 電卓自体、または入力欄をクリックした場合は閉じない
             if (calc.contains(e.target) || e.target === activeInput) return;
-
-            // それ以外をクリックしたら閉じる
             calc.style.display = 'none';
-        });
+        }
+
+        // PCではclick、iPhoneではtouchstart/pointerdownも検知
+        document.addEventListener('click', handleOutsideClose);
+        document.addEventListener('touchstart', handleOutsideClose);
+        document.addEventListener('pointerdown', handleOutsideClose);
 
 
 
