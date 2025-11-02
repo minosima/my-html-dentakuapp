@@ -631,8 +631,6 @@
         /* -----------------------------
            電卓表示・位置調整
            ----------------------------- */
-
-
         function showCalculator(input) {
             if (!input) return;
             activeInput = input;
@@ -643,50 +641,22 @@
             document.getElementById("calcDisplay").textContent = '0';
             calc.style.display = 'block';
 
-            // 親 .input-group（ラベル＋入力欄 全体のブロック）を取得
-            const group = input.closest('.input-group');
-            const rect = group ? group.getBoundingClientRect() : input.getBoundingClientRect();
+            adjustCalculatorPosition();
+            // スクロール調整（表示領域確保）
+            setTimeout(() => {
+                const inputRect = input.getBoundingClientRect();
+                const calcRect = calc.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                const visibleBottom = window.scrollY + viewportHeight;
+                const calcBottom = window.scrollY + inputRect.bottom + 10 + calcRect.height;
 
-            const scrollY = window.scrollY || document.documentElement.scrollTop;
-            const scrollX = window.scrollX || document.documentElement.scrollLeft;
-
-            // 電卓サイズ取得
-            const calcWidth = calc.offsetWidth || 320;
-
-            // --- 横位置：ラベル＋入力欄全体の中央に配置 ---
-            const left = scrollX + rect.left + (rect.width / 2) - (calcWidth / 2);
-
-            // --- 縦位置：入力欄ブロックの直下（8px余白） ---
-            const top = scrollY + rect.bottom + 8;
-
-            calc.style.left = `${left}px`;
-            calc.style.top = `${top}px`;
-            calc.style.position = 'absolute';
-            calc.style.zIndex = 1000;
-
-            // 位置追従
-            window.addEventListener('resize', () => {
-                if (activeInput) showCalculator(activeInput);
-            }, { once: true });
-            window.addEventListener('scroll', () => {
-                if (activeInput) showCalculator(activeInput);
-            }, { once: true });
+                // 電卓下部が見切れている場合に十分スクロールする
+                if (calcBottom > visibleBottom) {
+                    const scrollAmount = (calcBottom - visibleBottom) + 40; // ← 余裕をもって40px多くスクロール
+                    window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+                }
+            }, 50); // レイアウト確定後に実行
         }
-
-
-        // --- 電卓以外をタップまたはクリックしたら閉じる ---
-        function handleOutsideClose(e) {
-            const calc = document.getElementById("floatingCalc");
-            if (!calc) return;
-            if (calc.contains(e.target) || e.target === activeInput) return;
-            calc.style.display = 'none';
-        }
-
-        // PCではclick、iPhoneではtouchstart/pointerdownも検知
-        document.addEventListener('click', handleOutsideClose);
-        document.addEventListener('touchstart', handleOutsideClose);
-        document.addEventListener('pointerdown', handleOutsideClose);
-
 
 
         function adjustCalculatorPosition() {
