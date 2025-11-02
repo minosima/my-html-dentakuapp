@@ -102,6 +102,25 @@ function applyToInput(){
     document.getElementById('floatingCalc').style.display='none'; activeInput=null;
 }
 
+
+// 商品名入力後に Enter キーで価格欄に移動して電卓を表示
+document.getElementById('nameA').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        e.preventDefault();
+
+        const nextInput = document.getElementById('priceA');
+        if (!nextInput) return;
+
+        // 次の入力欄にフォーカスは当てずに電卓だけ表示
+        if (typeof showCalculator === 'function') {
+            showCalculator(nextInput);
+        }
+    }
+});
+  
+
+
+  
 document.querySelectorAll('.sectionA input[type=number]').forEach(input=>{ input.addEventListener('pointerdown',()=>showCalculator(input)); });
 document.querySelectorAll('#calcButtons button').forEach(b=>b.addEventListener('click',()=>{ const v=b.textContent; v==='C'?clearCalc():press(v); }));
 document.getElementById('equals').addEventListener('click',calculateExpression);
@@ -121,3 +140,4 @@ document.getElementById('calculate-btn').addEventListener('click',()=>{
 </script>
 </body>
 </html>
+
