@@ -146,13 +146,18 @@
             position: absolute;
             z-index: 1000;
             background: #fff;
-            border: 1px solid #ccc;
+            /* 左右だけ太めの枠線に変更 */
+            border-left: 5px solid #FFFFFF;
+            border-right: 5px solid #FFFFFF;;
+            border-top: 1px solid #ccc;
+            border-bottom: 15px solid #FFFFFF;
+
             padding: 10px;
             border-radius: 8px;
             max-width: 280px;
-            /* 電卓は bold 表示は可、だが控えめに */
             font-weight: 600;
         }
+
 
         #calcDisplay {
             font-size: 22px;
@@ -165,7 +170,8 @@
         #calcButtons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            column-gap: 10px; /* ← 横の隙間を広げる */
+            row-gap: 6px;     /* ← 縦の隙間は現状維持 */
         }
 
         #calcButtons button {
@@ -859,9 +865,10 @@
                     logContainer.style.display = 'none';
                 }
             });
-            li.appendChild(delBtn);
-            li.appendChild(copyBtn);
+
             li.appendChild(span);
+            li.appendChild(copyBtn);
+            li.appendChild(delBtn);
 
             // 先頭に追加（最新が上）
             logList.insertBefore(li, logList.firstChild);
