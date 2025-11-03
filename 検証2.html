@@ -306,12 +306,6 @@ document.querySelectorAll('.sectionA input').forEach(input => {
         } else {
             // 数値入力欄は電卓表示
             showCalculator(input);
-
-            // ソフトウェアキーボードを閉じる（iOS/Android対応）
-            if(/iPhone|iPad|Android/i.test(navigator.userAgent)){
-                input.setAttribute('readonly','');       // 一時的に読み取り専用
-                setTimeout(()=>input.removeAttribute('readonly'), 0); // 元に戻す
-            }
         }
     });
 
@@ -322,6 +316,7 @@ document.querySelectorAll('.sectionA input').forEach(input => {
         }
     });
 });
+
 
 
 document.querySelectorAll('#calcButtons button').forEach(btn=>{
