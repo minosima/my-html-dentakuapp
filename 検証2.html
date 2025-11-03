@@ -298,10 +298,31 @@ function temporarilyDisableAllButtons(ms){
 ----------------------------- */
 document.getElementById('calculate-btn').addEventListener('click', calculate);
 
-document.querySelectorAll('.sectionA input').forEach(input=>{
-    input.addEventListener('focus',()=>{ if(input.type==='number') showCalculator(input); });
-    input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); moveToNextInput(input); } });
+document.querySelectorAll('.sectionA input').forEach(input => {
+    input.addEventListener('focus', () => {
+        if(input.id === 'nameA'){
+            // 商品名は通常キーボード表示、電卓は非表示
+            document.getElementById("floatingCalc").style.display = 'none';
+        } else {
+            // 数値入力欄は電卓表示
+            showCalculator(input);
+
+            // ソフトウェアキーボードを閉じる（iOS/Android対応）
+            if(/iPhone|iPad|Android/i.test(navigator.userAgent)){
+                input.setAttribute('readonly','');       // 一時的に読み取り専用
+                setTimeout(()=>input.removeAttribute('readonly'), 0); // 元に戻す
+            }
+        }
+    });
+
+    input.addEventListener('keydown', e => {
+        if(e.key === 'Enter'){ 
+            e.preventDefault(); 
+            moveToNextInput(input); 
+        }
+    });
 });
+
 
 document.querySelectorAll('#calcButtons button').forEach(btn=>{
     btn.addEventListener('click',()=>{ const val=btn.textContent; if(val==='C') clearCalc(); else press(val); });
