@@ -258,19 +258,21 @@ function applyToInput(){
     temporarilyDisableAllButtons(500);
     if(!activeInput) return;
 
-    // ▼ 修正版：電卓に何も入力されていない場合
     if(!calcExpression.trim()){
-        // 入力なしの場合、既存値がある場合は維持
         if(activeInput.value && !activeInput.dataset.cleared){
             // 既存値をそのまま残す
         } else {
-            removeFormulaBelow(activeInput); // 式表示だけ削除
+            removeFormulaBelow(activeInput);
         }
 
         document.getElementById("floatingCalc").style.display = "none";
         const currentInput = activeInput;
         activeInput = null;
-        moveToNextInput(currentInput);
+
+        const next = moveToNextInput(currentInput);
+        if (next && next.id !== 'nameA') {
+            setTimeout(() => showCalculator(next), 80); // ← ★再表示を保証
+        }
         return;
     }
 
@@ -285,8 +287,13 @@ function applyToInput(){
     document.getElementById("floatingCalc").style.display = "none";
     const currentInput = activeInput;
     activeInput = null;
-    moveToNextInput(currentInput);
+
+    const next = moveToNextInput(currentInput);
+    if (next && next.id !== 'nameA') {
+        setTimeout(() => showCalculator(next), 80); // ← ★ここを追加
+    }
 }
+
 
 
 function showCalculator(input){
