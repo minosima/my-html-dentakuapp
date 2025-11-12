@@ -451,11 +451,19 @@ document.querySelectorAll('.sectionA input').forEach(input => {
 
             const next = moveToNextInput(input);
             if (next) {
-                if(next.id !== 'nameA') showCalculator(next); // 次が数値入力なら電卓表示
-                else next.focus(); // 商品名などはフォーカスのみ
+                if (next.id === 'priceA') {
+                    // ▼ 商品名から価格欄に移動するときだけ、確実にキーボードを閉じる
+                    input.blur();
+                    setTimeout(() => showCalculator(next), 80);
+                } else if (next.id !== 'nameA') {
+                    showCalculator(next); // 通常の数値欄
+                } else {
+                    next.focus(); // 商品名などはそのまま
+                }
             } else {
                 document.getElementById("calculate-btn").focus();
             }
+
         }
     });
 
