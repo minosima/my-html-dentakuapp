@@ -562,27 +562,22 @@ document.querySelectorAll('.sectionA input').forEach(input => {
 /* -----------------------------
    電卓外クリックで閉じる
 ----------------------------- */
-document.addEventListener('click', function(e){
-    const calc = document.getElementById('floatingCalc');
+document.addEventListener('click', e => {
+  // 電卓が存在しない、または非表示なら無視
+  if (!calculatorContainer || calculatorContainer.style.display === 'none') return;
 
-    // 電卓が非表示なら何もしない
-    if(calc.style.display !== 'block') return;
+  // ▼ 電卓または入力欄をクリックした場合は閉じない
+  if (
+    calculatorContainer.contains(e.target) ||
+    e.target.closest('input') // ← 現在の入力欄
+  ) {
+    return;
+  }
 
-    // 電卓内クリック → 閉じない
-    if(calc.contains(e.target)) return;
-
-    // 電卓を開いた input をクリック → 閉じない
-    if(activeInput && activeInput.contains(e.target)) return;
-
-    // 上記以外 → 電卓を閉じる
-    calc.style.display = 'none';
-    activeInput = null;
-}, true);
-document.getElementById('calculate-btn').addEventListener('focus', () => {
-    const calc = document.getElementById('floatingCalc');
-    calc.style.display = 'none';
-    activeInput = null;
+  // それ以外の場所をクリックしたら閉じる
+  calculatorContainer.style.display = 'none';
 });
+
 
 
 </script>
