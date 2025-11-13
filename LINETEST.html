@@ -5,94 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>汎用コスト計算</title>
 <style>
-body {
-    touch-action: manipulation;
-    font-family: sans-serif;
-    background: #f0f0f0;
-    padding: 30px;
-    text-align: center;
-}
-.calculator { width: 100%; max-width: 420px; margin: 0 auto; }
-.sectionA { background-color: #e3f2fd; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px; }
-.input-group { display: flex; align-items: center; gap: 10px; }
-.label-with-clear { display: flex; align-items: center; gap: 6px; flex: 0 0 100px; }
-.label-with-clear label { color: #1565c0; font-weight: bold; text-align: left; white-space: nowrap; font-size: 17px; }
-.label-with-clear .clear-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; font-weight: bold; padding: 2px 6px; font-size: 13px; cursor: pointer; transition: background 0.2s; }
-.label-with-clear .clear-btn:hover { background: #ffcdd2; }
-.input-container { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.input-container input { width:100%; border:2px solid #90caf9; background:#fff; padding:6px; border-radius:4px; font-size:17px; box-sizing:border-box; text-align:right; touch-action: manipulation; flex: 1; }
-button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
-#calculate-btn { font-size:20px; padding:12px 30px; background:#ff5722; color:#fff; border:none; border-radius:8px; cursor:pointer; transition:0.3s; }
-#calculate-btn:hover { background:#f4511e; }
-#result { margin-top:20px; font-size:18px; color:#333; text-align:left; }
-.resultA { color:#1565c0; }
-#logContainer { max-width:420px; margin:20px auto 0; text-align:left; display:none; }
-#logHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-#calcLog { list-style:none; padding:0; margin:0; }
-#calcLog li { background:#fff; border:1px solid #ccc; border-radius:4px; padding:8px; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
-.logText { flex:1; margin-right:8px; word-break:break-all; }
-.logBtn { font-size:14px; font-weight:bold; padding:4px 8px; border:none; border-radius:4px; margin-left:4px; cursor:pointer; }
-.logBtn.copy { background:#e3f2fd; color:#1565c0; }
-.logBtn.delete { background:#ffebee; color:#c62828; }
-#calcLog li.placeholder-log .logBtn { display:none; }
-.formula-note { font-style:italic; font-size:14px; color:#777; margin-top:4px; text-align:left; }
-#floatingCalc { display:none; position:absolute; z-index:1000; background:#fff; padding:20px; max-width:360px; max-height:500px; border-radius:10px; font-weight:600; border-top:1px solid #fff; border-left:18px solid #fff; border-right:18px solid #fff; border-bottom:64px solid #fff; transform-origin: top center; }
-#calcDisplay { font-size:22px; font-weight:bold; margin-bottom:0; text-align:right; min-width:120px; }
-#calcButtons { display:grid; grid-template-columns:repeat(4,1fr); column-gap:10px; row-gap:6px; }
-#calcButtons button, #calcApply button { height:40px; font-size:20px; font-weight:bold; background:#e3f2fd; border:none; border-radius:4px; color:#1565c0; cursor:pointer; display:flex; justify-content:center; align-items:center; }
-#calcApply { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px; width:100%; }
-#calcApply > button#apply { grid-column:3/ span 2; background:#ff9800; color:#fff; }
-#customConfirmModal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4); }
-#customConfirmModal > div { background:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:80%; max-width:300px; border-radius:8px; }
-#customConfirmModal p { font-size:16px; font-weight:bold; }
-#customConfirmModal button { padding:8px 16px; }
-#toast { visibility:hidden; min-width:160px; background:#323232; color:#fff; text-align:center; border-radius:8px; padding:10px; position:fixed; z-index:2000; left:50%; bottom:40px; transform:translateX(-50%); font-size:16px; opacity:0; transition: opacity 0.4s, bottom 0.4s; }
-#toast.show { visibility:visible; opacity:0.95; bottom:60px; }
-.clear-btn { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; font-weight: bold; font-size: 17px; padding: 6px 12px; cursor: pointer; transition: background 0.2s; }
-.restore-btn { background: #00bcd4; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: inline-block; margin-top: 4px; }
-.restore-btn:hover { background: #0097a7; }
+    body { font-family:sans-serif; background:#f0f0f0; padding:30px; text-align:center; touch-action:manipulation; }
+    .calculator { width:100%; max-width:420px; margin:0 auto; }
+    .sectionA { background:#e3f2fd; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px; }
+    .input-group { display:flex; align-items:center; gap:10px; }
+    .label-with-clear { display:flex; align-items:center; gap:6px; flex:0 0 100px; }
+    .label-with-clear label { color:#1565c0; font-weight:bold; font-size:17px; }
+    .clear-btn { background:#ffebee; color:#c62828; border:1px solid #ffcdd2; border-radius:4px; font-weight:bold; font-size:17px; padding:6px 12px; cursor:pointer; transition:background 0.2s; }
+    .clear-btn:hover { background:#ffcdd2; }
+    .input-container { flex:1; display:flex; flex-direction:column; gap:4px; }
+    .input-container input { width:100%; border:2px solid #90caf9; background:#fff; padding:6px; border-radius:4px; font-size:17px; text-align:right; }
+    button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
+    #calculate-btn { font-size:20px; padding:12px 30px; background:#ff5722; color:#fff; border:none; border-radius:8px; }
+    #result { margin-top:20px; font-size:18px; color:#333; text-align:left; }
+    .resultA { color:#1565c0; }
+    #logContainer { max-width:420px; margin:20px auto 0; text-align:left; display:none; }
+    #logHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    #calcLog { list-style:none; padding:0; margin:0; }
+    #calcLog li { background:#fff; border:1px solid #ccc; border-radius:4px; padding:8px; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+    .logText { flex:1; margin-right:8px; word-break:break-all; }
+    .logBtn { font-size:14px; font-weight:bold; padding:4px 8px; border:none; border-radius:4px; margin-left:4px; cursor:pointer; }
+    .logBtn.copy { background:#e3f2fd; color:#1565c0; }
+    .logBtn.delete { background:#ffebee; color:#c62828; }
+    .formula-note { font-style:italic; font-size:14px; color:#777; margin-top:4px; text-align:left; }
+    #floatingCalc { display:none; position:absolute; z-index:1000; background:#fff; padding:20px; max-width:360px; max-height:500px; border-radius:10px; font-weight:600; border-top:1px solid #fff; border-left:18px solid #fff; border-right:18px solid #fff; border-bottom:64px solid #fff; transform-origin:top center; }
+    #calcDisplay { font-size:22px; font-weight:bold; margin-bottom:0; text-align:right; min-width:120px; }
+    #calcButtons { display:grid; grid-template-columns:repeat(4,1fr); column-gap:10px; row-gap:6px; }
+    #calcButtons button, #calcApply button { height:40px; font-size:20px; font-weight:bold; background:#e3f2fd; border:none; border-radius:4px; color:#1565c0; cursor:pointer; display:flex; justify-content:center; align-items:center; }
+    #calcApply { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:8px; width:100%; }
+    #calcApply > button#apply { grid-column:3/span 2; background:#ff9800; color:#fff; }
+    #customConfirmModal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4); }
+    #customConfirmModal > div { background:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:80%; max-width:300px; border-radius:8px; }
+    #customConfirmModal p { font-size:16px; font-weight:bold; }
+    #customConfirmModal button { padding:8px 16px; }
+    #toast { visibility:hidden; min-width:160px; background:#323232; color:#fff; text-align:center; border-radius:8px; padding:10px; position:fixed; z-index:2000; left:50%; bottom:40px; transform:translateX(-50%); font-size:16px; opacity:0; transition: opacity 0.4s, bottom 0.4s; }
+    #toast.show { visibility:visible; opacity:0.95; bottom:60px; }
+    .restore-btn { background:#00bcd4; color:white; padding:6px 12px; border-radius:6px; cursor:pointer; display:inline-block; margin-top:4px; }
+    .restore-btn:hover { background:#0097a7; }
 </style>
 </head>
 <body>
-
 <div class="calculator">
     <h2>汎用コスト計算</h2>
     <div class="sectionA">
         <div class="input-group">
-          <div class="label-with-clear">
-            <label for="nameA">商品名</label>
-            <button id="clearName" type="button" class="clear-btn">Ｃ</button>
-          </div>
-          <div class="input-container">
-            <input type="text" id="nameA" placeholder="任意">
-          </div>
+            <div class="label-with-clear">
+                <label for="nameA">商品名</label>
+                <button id="clearName" type="button" class="clear-btn">Ｃ</button>
+            </div>
+            <div class="input-container"><input type="text" id="nameA" placeholder="任意"></div>
         </div>
         <div class="input-group">
-          <div class="label-with-clear">
-            <label for="priceA">価　格</label>
-            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
-          </div>
-          <div class="input-container">
-            <input type="number" id="priceA">
-          </div>
+            <div class="label-with-clear"><label for="priceA">価　格</label><button class="clear-btn" style="visibility:hidden;"></button></div>
+            <div class="input-container"><input type="number" id="priceA"></div>
         </div>
         <div class="input-group">
-          <div class="label-with-clear">
-            <label for="volumeA">本体量</label>
-            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
-          </div>
-          <div class="input-container">
-            <input type="number" id="volumeA">
-          </div>
+            <div class="label-with-clear"><label for="volumeA">本体量</label><button class="clear-btn" style="visibility:hidden;"></button></div>
+            <div class="input-container"><input type="number" id="volumeA"></div>
         </div>
         <div class="input-group">
-          <div class="label-with-clear">
-            <label for="usageA">使用量</label>
-            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
-          </div>
-          <div class="input-container">
-            <input type="number" id="usageA" value="1">
-          </div>
+            <div class="label-with-clear"><label for="usageA">使用量</label><button class="clear-btn" style="visibility:hidden;"></button></div>
+            <div class="input-container"><input type="number" id="usageA" value="1"></div>
         </div>
     </div>
     <button id="calculate-btn">計算する</button>
@@ -101,27 +74,9 @@ button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
 
 <button onclick="downloadBackup()">バックアップ保存</button>
 <label class="restore-btn">
-  <input type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)">
-  バックアップ復元
+    <input type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)">
+    バックアップ復元
 </label>
-
-<div id="floatingCalc">
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-        <button id="powerOff" style="margin-right:8px; background:#f44336; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">電消</button>
-        <div id="calcDisplay" style="flex:1; text-align:right; font-size:22px; font-weight:bold;">0</div>
-    </div>
-    <div id="calcButtons">
-        <button>７</button><button>８</button><button>９</button><button>÷</button>
-        <button>４</button><button>５</button><button>６</button><button>×</button>
-        <button>１</button><button>２</button><button>３</button><button>－</button>
-        <button>０</button><button>.</button><button>C</button><button>＋</button>
-    </div>
-    <div id="calcApply">
-        <button id="equals">=</button>
-        <div class="spacer"></div>
-        <button id="apply">入力</button>
-    </div>
-</div>
 
 <div id="logContainer">
     <div id="logHeader">
@@ -147,146 +102,91 @@ button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
 <div id="toast" aria-live="polite" role="status">コピーしました</div>
 
 <script>
-// ========================
-// 共通関数
-// ========================
-function showToast(message, bgColor='#333', textColor='#fff'){
-    const existingToast = document.querySelector('.custom-toast');
-    if(existingToast) existingToast.remove();
-    const toast = document.createElement('div');
-    toast.className='custom-toast';
-    toast.textContent=message;
-    toast.style.position='fixed';
-    toast.style.bottom='20px';
-    toast.style.left='50%';
-    toast.style.transform='translateX(-50%)';
-    toast.style.background=bgColor;
-    toast.style.color=textColor;
-    toast.style.padding='10px 20px';
-    toast.style.borderRadius='8px';
-    toast.style.fontSize='14px';
-    toast.style.opacity='0';
-    toast.style.transition='opacity 0.2s ease';
-    toast.style.zIndex='9999';
-    toast.style.pointerEvents='none';
-    document.body.appendChild(toast);
-    requestAnimationFrame(()=>toast.style.opacity='1');
-    setTimeout(()=>{toast.style.opacity='0'; setTimeout(()=>toast.remove(),200);},2000);
-}
+/* -----------------------------
+   共通関数
+----------------------------- */
+function showToast(msg,bg='#333',tc='#fff'){const t=document.getElementById('toast'); t.textContent=msg; t.style.background=bg; t.style.color=tc; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000);}
+function copyTextToClipboard(text){if(!text||!text.trim()){showToast('ログがありません'); return;} navigator.clipboard?.writeText(text).then(()=>showToast('コピーしました','#1565c0','#fff')).catch(()=>showToast('コピー失敗','#ff5252','#fff'));}
 
-function copyTextToClipboard(text){
-    if(!text || !text.trim()){ showToast('ログがありません'); return; }
-    if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(()=>showToast('コピーしました','#1976d2'));
-    }else{
-        const ta=document.createElement('textarea');
-        ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0';
-        document.body.appendChild(ta); ta.focus(); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-        showToast('コピーしました','#1976d2');
-    }
-}
-
-function normalizeExpression(expr){
-    return expr.replace(/[！-～]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0))
-               .replace(/×/g,'*').replace(/÷/g,'/').replace(/－/g,'-').replace(/＋/g,'+')
-               .replace(/，/g,',').replace(/．/g,'.');
-}
-
-function moveToNextInput(currentInput){
-    const inputs=Array.from(document.querySelectorAll(".sectionA input"));
-    const idx=inputs.indexOf(currentInput);
-    if(idx>-1 && idx<inputs.length-1){
-        const next=inputs[idx+1];
-        setTimeout(()=>{ next.focus(); if(next.type==='number') showCalculator(next); },0);
-    }
-}
-
-// ========================
-// 電卓
-// ========================
-let calcExpression='', calcEvaluated=false, calcResult=null, activeInput=null;
-function press(value){ if(calcEvaluated){calcExpression=''; calcEvaluated=false;} calcExpression+=value; document.getElementById("calcDisplay").textContent=calcExpression; }
-function clearCalc(){ calcExpression=''; calcEvaluated=false; calcResult=null; document.getElementById("calcDisplay").textContent='0'; if(activeInput){ activeInput.value=''; removeFormulaBelow(activeInput); } }
-function calculateExpression(){ try{ const normalized=normalizeExpression(calcExpression); calcResult=eval(normalized); document.getElementById("calcDisplay").textContent=`${calcExpression} = ${calcResult}`; calcEvaluated=true; }catch{ document.getElementById("calcDisplay").textContent='式エラー'; calcEvaluated=false; } }
-function applyToInput(){
-    temporarilyDisableAllButtons(500);
-    if(!activeInput) return;
-    if(!calcExpression.trim()){ document.getElementById("floatingCalc").style.display='none'; const cur=activeInput; activeInput=null; moveToNextInput(cur); return; }
-    if(!calcEvaluated) calculateExpression();
-    if(calcEvaluated && !isNaN(calcResult)){ activeInput.value=calcResult; showFormulaBelow(activeInput, calcExpression, calcResult); } else { removeFormulaBelow(activeInput); }
-    document.getElementById("floatingCalc").style.display='none'; const cur=activeInput; activeInput=null; moveToNextInput(cur);
-}
-function showCalculator(input){ if(!input) return; activeInput=input; calcExpression=''; calcEvaluated=false; calcResult=null; document.getElementById("calcDisplay").textContent='0'; const calc=document.getElementById("floatingCalc"); calc.style.display='block'; adjustCalculatorPosition(); const rect=calc.getBoundingClientRect(); const newTop=window.scrollY+input.getBoundingClientRect().bottom+5; if(newTop+rect.height>window.scrollY+window.innerHeight){ window.scrollBy({top:(newTop+rect.height)-(window.scrollY+window.innerHeight)+10, behavior:'smooth'}); } }
-document.querySelectorAll('.sectionA input[type="number"]').forEach(input=>{
-    input.addEventListener('touchstart', e=>{ e.preventDefault(); e.stopPropagation(); showCalculator(input); });
-    input.addEventListener('click', e=>{ e.preventDefault(); showCalculator(input); });
-});
-function adjustCalculatorPosition(){ const calc=document.getElementById('floatingCalc'); if(!calc||!activeInput) return; const grp=activeInput.closest('.input-group'); const rect=grp?grp.getBoundingClientRect():activeInput.getBoundingClientRect(); const scrollY=window.scrollY||document.documentElement.scrollTop; const scrollX=window.scrollX||document.documentElement.scrollLeft; const top=scrollY+rect.bottom+5; const left=scrollX+rect.left+(rect.width/2)-(calc.offsetWidth/2); calc.style.top=`${top}px`; calc.style.left=`${left}px`; calc.style.display='block'; }
-function showFormulaBelow(input, expr, result){ const container=input.closest('.input-container'); if(!container) return; let note=container.querySelector('.formula-note'); if(!note){ note=document.createElement('div'); note.className='formula-note'; container.appendChild(note); } const normalized=normalizeExpression(expr); note.textContent=/[+\-*/]/.test(normalized)?normalized.replace(/\*/g,'×').replace(/\//g,'÷')+` = ${result}`:result; }
-function removeFormulaBelow(input){ const note=input.nextElementSibling; if(note && note.classList.contains("formula-note")) note.remove(); }
-
-// ========================
-// ログ管理
-// ========================
+/* -----------------------------
+   ログ管理
+----------------------------- */
 function addLog(text){
-    const logList=document.getElementById('calcLog'); const logContainer=document.getElementById('logContainer'); logContainer.style.display='block';
+    const logList=document.getElementById('calcLog'); document.getElementById('logContainer').style.display='block';
     const li=document.createElement('li'); const span=document.createElement('span'); span.className='logText'; span.textContent=text;
-    const copyBtn=document.createElement('button'); copyBtn.className='logBtn copy'; copyBtn.textContent='コピー'; copyBtn.addEventListener('click',()=>{ copyTextToClipboard(span.textContent); saveLogsToLocalStorage(); });
-    const delBtn=document.createElement('button'); delBtn.className='logBtn delete'; delBtn.textContent='削除'; delBtn.addEventListener('click',()=>{ li.remove(); saveLogsToLocalStorage(); showToast("削除しました","red"); if(logList.querySelectorAll('li').length===0) logContainer.style.display='none'; });
-    li.append(span, copyBtn, delBtn); logList.insertBefore(li, logList.firstChild);
+    const copyBtn=document.createElement('button'); copyBtn.className='logBtn copy'; copyBtn.textContent='コピー'; copyBtn.addEventListener('click',()=>copyTextToClipboard(span.textContent));
+    const delBtn=document.createElement('button'); delBtn.className='logBtn delete'; delBtn.textContent='削除'; delBtn.addEventListener('click',()=>{li.remove(); showToast("削除しました","red"); if(logList.querySelectorAll('li').length===0) document.getElementById('logContainer').style.display='none';});
+    li.append(span,copyBtn,delBtn); logList.insertBefore(li, logList.firstChild);
 }
 
-// ========================
-// 計算処理
-// ========================
+/* -----------------------------
+   計算
+----------------------------- */
 function calculate(){
     const name=document.getElementById('nameA').value.trim()||'商品A';
     const v=parseFloat(document.getElementById('volumeA').value);
     const u=parseFloat(document.getElementById('usageA').value);
     const p=parseFloat(document.getElementById('priceA').value);
-    if([v,u,p].some(isNaN)){ showToast("数字を入力してください"); return; }
-    const result=(p/v)*u;
-    const resultStr=`${name}の単価: ${result.toFixed(2)}`;
-    document.getElementById('result').innerHTML=`<span class="resultA">${resultStr}</span>`;
-    addLog(resultStr);
-    saveLogsToLocalStorage();
+    let output='', logText='';
+    if(v>0 && u>0 && p>=0 && !isNaN(v)&&!isNaN(u)&&!isNaN(p)){
+        const cost=p*(u/v);
+        output=`<div class="resultA"><strong>${name}</strong><br>1回のコスト：${cost.toFixed(2)} 円</div>`;
+        logText=`${name}: ${p} ÷ ${v} × ${u} = ${cost.toFixed(2)} 円`;
+    } else { output=`<div class="resultA">${name}の入力が不完全です</div>`; logText=`${name}の入力が不完全です`; }
+    document.getElementById('result').innerHTML=output;
+    addLog(logText);
+    showToast("計算しました",'#ff5722');
 }
-document.getElementById('calculate-btn').addEventListener('click',calculate);
-document.getElementById('clearName').addEventListener('click',()=>{ document.getElementById('nameA').value=''; });
 
-// ========================
-// ローカル保存
-// ========================
+/* -----------------------------
+   バックアップ保存・復元
+----------------------------- */
 const STORAGE_KEY="calcLogsBackup";
-function saveLogsToLocalStorage(){ const logs=Array.from(document.querySelectorAll('#calcLog .logText')).map(el=>el.textContent); localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); }
-function loadLogsFromLocalStorage(){ const saved=localStorage.getItem(STORAGE_KEY); if(!saved) return; const logs=JSON.parse(saved); if(Array.isArray(logs)&&logs.length>0){ logs.forEach(text=>addLog(text)); document.getElementById('logContainer').style.display='block'; } }
+function saveLogsToLocalStorage(){const logs=Array.from(document.querySelectorAll('#calcLog .logText')).map(el=>el.textContent); localStorage.setItem(STORAGE_KEY,JSON.stringify(logs));}
+function loadLogsFromLocalStorage(){const saved=localStorage.getItem(STORAGE_KEY); if(!saved) return; JSON.parse(saved).forEach(text=>addLog(text));}
+function downloadBackup(){const logs=localStorage.getItem(STORAGE_KEY); if(!logs){showToast("保存されたログがありません","#ff5252"); return;} const blob=new Blob([logs],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="calcLogsBackup.json"; a.click(); showToast("バックアップをダウンロードしました","#00c853");}
+function restoreBackup(event){const file=event.target.files[0]; if(!file){showToast("ファイルが選択されていません","#ff5252"); return;} const reader=new FileReader(); reader.onload=(e)=>{try{const logs=JSON.parse(e.target.result); if(!Array.isArray(logs)) throw new Error("形式が不正"); document.getElementById("calcLog").innerHTML=""; logs.forEach(text=>addLog(text)); localStorage.setItem(STORAGE_KEY,JSON.stringify(logs)); showToast("バックアップを復元しました","#00c853");}catch{showToast("復元に失敗しました","#ff5252");}}; reader.readAsText(file);}
 window.addEventListener('DOMContentLoaded',loadLogsFromLocalStorage);
-document.getElementById('copyAllLogs').addEventListener('click',()=>{ const logs=Array.from(document.querySelectorAll('#calcLog .logText')).map(sp=>sp.textContent).join('\n'); copyTextToClipboard(logs); saveLogsToLocalStorage(); });
 
-// ========================
-// バックアップ
-// ========================
-function downloadBackup(){ const saved=localStorage.getItem(STORAGE_KEY); if(!saved||saved==="[]"){ showToast("保存されたバックアップがありません","#ff5252"); return; } const blob=new Blob([saved],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="calcLogsBackup.json"; a.click(); URL.revokeObjectURL(url); showToast("バックアップをダウンロードしました","#00c853"); }
-function restoreBackup(event){ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=(e)=>{ try{ const logs=JSON.parse(e.target.result); if(!Array.isArray(logs)) throw new Error("形式が不正です"); const logArea=document.getElementById("calcLog"); logArea.innerHTML=""; logs.forEach(text=>addLog(text)); localStorage.setItem(STORAGE_KEY,JSON.stringify(logs)); document.getElementById("logContainer").style.display="block"; showToast("バックアップを復元しました","#00bcd4"); }catch(err){ showToast("復元に失敗しました","#ff5252"); } }; reader.readAsText(file); }
+/* -----------------------------
+   入力フォーカス移動
+----------------------------- */
+function moveToNextInput(currentInput){
+    const inputs=Array.from(document.querySelectorAll(".sectionA input"));
+    const idx=inputs.indexOf(currentInput);
+    if(idx>-1 && idx<inputs.length-1){inputs[idx+1].focus();}
+}
 
-// ========================
-// 全削除
-// ========================
-document.getElementById('clearAllLogs').addEventListener('click',()=>{ document.getElementById('customConfirmModal').style.display='block'; });
-document.getElementById('confirmNo').addEventListener('click',()=>{ document.getElementById('customConfirmModal').style.display='none'; });
-document.getElementById('confirmYes').addEventListener('click',()=>{ document.getElementById('calcLog').innerHTML=''; document.getElementById('logContainer').style.display='none'; localStorage.removeItem(STORAGE_KEY); document.getElementById('customConfirmModal').style.display='none'; showToast("すべて削除しました","red"); });
+document.getElementById('calculate-btn').addEventListener('click',calculate);
+document.getElementById('nameA').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); moveToNextInput(e.target);}});
 
-// ========================
-// 電卓ボタン操作
-// ========================
-document.querySelectorAll('#calcButtons button').forEach(b=>b.addEventListener('click',()=>{ const v=b.textContent; if(v==='C'){ clearCalc(); } else { press(v); } }));
+/* -----------------------------
+   商品名クリア
+----------------------------- */
+document.getElementById('clearName').addEventListener('click',()=>{const nameInput=document.getElementById('nameA'); nameInput.value=''; nameInput.focus(); showToast('商品名をクリアしました','#c62828');});
+
+/* -----------------------------
+   電卓（number input用）
+----------------------------- */
+let activeInput=null, calcExpression='', calcEvaluated=false, calcResult=null;
+function normalizeExpression(expr){return expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/－/g,'-').replace(/＋/g,'+');}
+function press(val){if(calcEvaluated){calcExpression=''; calcEvaluated=false;} calcExpression+=val; document.getElementById("calcDisplay").textContent=calcExpression;}
+function clearCalc(){calcExpression=''; calcEvaluated=false; calcResult=null; document.getElementById("calcDisplay").textContent='0';}
+function calculateExpression(){try{calcResult=eval(normalizeExpression(calcExpression)); document.getElementById("calcDisplay").textContent=`${calcExpression} = ${calcResult}`; calcEvaluated=true;}catch{document.getElementById("calcDisplay").textContent='式エラー'; calcEvaluated=false;}}
+function applyToInput(){if(!activeInput) return; if(!calcExpression.trim()){document.getElementById("floatingCalc").style.display='none'; moveToNextInput(activeInput); activeInput=null; return;} if(!calcEvaluated) calculateExpression(); if(calcEvaluated && !isNaN(calcResult)) activeInput.value=calcResult; document.getElementById("floatingCalc").style.display='none'; moveToNextInput(activeInput); activeInput=null;}
+function showCalculator(input){activeInput=input; calcExpression=''; calcEvaluated=false; calcResult=null; document.getElementById("calcDisplay").textContent='0'; const calc=document.getElementById("floatingCalc"); calc.style.display='block'; const rect=input.getBoundingClientRect(); calc.style.top=window.scrollY+rect.bottom+5+'px'; calc.style.left=window.scrollX+rect.left+(rect.width/2)-(calc.offsetWidth/2)+'px';}
+document.querySelectorAll('.sectionA input[type="number"]').forEach(input=>{input.addEventListener('touchstart',e=>{e.preventDefault(); showCalculator(input);}); input.addEventListener('click',e=>{showCalculator(input);});});
+document.querySelectorAll('#calcButtons button').forEach(btn=>{btn.addEventListener('click',()=>{const val=btn.textContent; if(val==='C') clearCalc(); else press(val);});});
 document.getElementById('equals').addEventListener('click',calculateExpression);
 document.getElementById('apply').addEventListener('click',applyToInput);
-document.getElementById('powerOff').addEventListener('click',()=>{ document.getElementById("floatingCalc").style.display='none'; activeInput=null; });
 
-// 一時的に全ボタン無効
-function temporarilyDisableAllButtons(ms){ document.querySelectorAll("button").forEach(btn=>btn.disabled=true); setTimeout(()=>document.querySelectorAll("button").forEach(btn=>btn.disabled=false),ms); }
+/* -----------------------------
+   全コピー/全削除
+----------------------------- */
+document.getElementById('copyAllLogs').addEventListener('click',()=>{const logs=Array.from(document.querySelectorAll('#calcLog .logText')).map(sp=>sp.textContent).join('\n'); copyTextToClipboard(logs);});
+document.getElementById('clearAllLogs').addEventListener('click',()=>document.getElementById('customConfirmModal').style.display='block');
+document.getElementById('confirmNo').addEventListener('click',()=>document.getElementById('customConfirmModal').style.display='none');
+document.getElementById('confirmYes').addEventListener('click',()=>{document.getElementById('calcLog').innerHTML=''; document.getElementById('logContainer').style.display='none'; document.getElementById('customConfirmModal').style.display='none'; showToast("削除しました","red");});
 </script>
 </body>
 </html>
