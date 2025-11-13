@@ -199,6 +199,14 @@
     <div id="result"></div>
 </div>
 
+<button onclick="downloadBackup()">バックアップ保存</button>
+<label class="restore-btn">
+  <input type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)">
+  バックアップ復元
+</label>
+
+
+    
 <div id="floatingCalc">
     <div style="display:flex; align-items:center; margin-bottom:8px;">
         <button id="powerOff" style="margin-right:8px; background:#f44336; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">電消</button>
@@ -243,11 +251,7 @@
 
 <div style="height:1000px;"></div>
 
-<button onclick="downloadBackup()">バックアップ保存</button>
-<label class="restore-btn">
-  <input type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)">
-  バックアップ復元
-</label>
+
 
 <script>
 /* -----------------------------
