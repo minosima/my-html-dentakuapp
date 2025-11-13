@@ -134,6 +134,18 @@
         cursor: pointer;
         transition: background 0.2s;
     }
+    .restore-btn ｛
+      background: #00bcd4;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .restore-btn:hover {
+      background: #0097a7;
+    }
 
 
 </style>
@@ -209,8 +221,6 @@
 <div id="logContainer">
     <div id="logHeader">
         <h3>計算ログ</h3>
-        <button id="sendToKeepBtn" class="logBtn copy">KEEPに保存</button>
-
         <div id="logActions">
             <button id="copyAllLogs" class="logBtn copy">全コピー</button>
             <button id="clearAllLogs" class="logBtn delete" type="button">全クリア</button>
@@ -233,6 +243,11 @@
 
 <div style="height:1000px;"></div>
 
+<button onclick="downloadBackup()">バックアップ保存</button>
+<label class="restore-btn">
+  <input type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)">
+  バックアップ復元
+</label>
 
 <script>
 /* -----------------------------
@@ -577,44 +592,79 @@ document.getElementById('powerOff').addEventListener('click', () => {
     calc.style.display = 'none';
     activeInput = null; // 現在選択中の入力を解除
 });
-  async function initializeLiff() {
-    await liff.init({ liffId: "2008490103-B97J4qeQ" }); //LIFF ID _ LIFF URLの末尾
-    if (!liff.isInClient()) {
-      alert("LINEアプリ内で開いてください");
-    }
-  }
-  initializeLiff();
+// === 自動保存・復元機能 ===
 
-  async function sendToKeep(text) {
-  if (!liff.isInClient()) {
-    showToast("LINEアプリ内でのみ使用可能");
-    return;
-  }
+// LocalStorageキー名（他ツールと被らないように独自名に）
+const STORAGE_KEY = "calcLogsBackup";
 
-  try {
-    await liff.shareTargetPicker([
-      {
-        type: "text",
-        text: text
-      }
-    ]);
-    showToast("KEEPに送信しました", "#00c853");
-  } catch (err) {
-    console.error(err);
-    showToast("送信に失敗しました", "#c62828");
-  }
+// ログをLocalStorageに保存
+function saveLogsToLocalStorage() {
+  const logs = Array.from(document.querySelectorAll('#calcLog .logText'))
+                    .map(el => el.textContent);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 }
 
-  document.getElementById('sendToKeepBtn').addEventListener('click', () => {
-    const logs = Array.from(document.querySelectorAll('#calcLog .logText'))
-                       .map(sp => sp.textContent)
-                       .join('\n');
-    if (!logs.trim()) {
-        showToast("ログがありません");
-        return;
+// LocalStorageから復元
+function loadLogsFromLocalStorage() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+  const logs = JSON.parse(saved);
+  logs.forEach(text => addLog(text));
+}
+
+// ページ読み込み時に自動復元
+window.addEventListener('DOMContentLoaded', loadLogsFromLocalStorage);
+
+// ログ追加時に自動保存（addLogの最後に追記でもOK）
+function addLogWithSave(text) {
+  addLog(text);
+  saveLogsToLocalStorage();
+}
+
+// === バックアップダウンロード ===
+function downloadBackup() {
+  const logs = localStorage.getItem(STORAGE_KEY);
+  if (!logs) {
+    showToast("保存されたログがありません", "#ff5252");
+    return;
+  }
+  const blob = new Blob([logs], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "calcLogsBackup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("バックアップをダウンロードしました", "#00c853");
+}
+<script>
+// === バックアップ復元 ===
+function restoreBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const logs = JSON.parse(e.target.result);
+      if (!Array.isArray(logs)) throw new Error("形式が不正です");
+
+      // 既存ログをクリアして復元
+      const logArea = document.getElementById("calcLog");
+      logArea.innerHTML = "";
+      logs.forEach(text => addLog(text));
+
+      // LocalStorageにも反映
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+
+      showToast("バックアップを復元しました", "#00c853");
+    } catch (err) {
+      showToast("復元に失敗しました（ファイル形式エラー）", "#ff5252");
     }
-    sendToKeep(logs);
-});
+  };
+  reader.readAsText(file);
+}
+</script>
 
 </script>
 </body>
