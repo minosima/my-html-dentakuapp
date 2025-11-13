@@ -15,9 +15,69 @@
 
     .calculator { width: 100%; max-width: 420px; margin: 0 auto; }
     .sectionA { background-color: #e3f2fd; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px; }
-    .input-group { display:flex; align-items:center; gap:15px; }
-    .input-group label { flex:0 0 100px; color:#1565c0; font-weight:bold; text-align:left; }
-    .input-container { flex:1; }
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* ラベルとCボタンをまとめた小コンテナ */
+    .label-with-clear {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 100px; /* ← ラベル＋Cボタン分の固定幅 */
+    }
+
+    /* ラベル */
+    .label-with-clear label {
+        color: #1565c0;
+        font-weight: bold;
+        text-align: left;
+        white-space: nowrap;
+        font-size: 17px;  /* ここを追加して商品名と同じサイズに */
+    }
+
+
+    /* Cボタン */
+    .label-with-clear .clear-btn {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+        border-radius: 4px;
+        font-weight: bold;
+        padding: 2px 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .label-with-clear .clear-btn:hover {
+        background: #ffcdd2;
+    }
+
+    /* 入力欄共通 */
+    .input-container {
+        flex: 1;
+    }
+    .input-container input {
+        width: 100%;
+        border: 2px solid #90caf9;
+        background: #fff;
+        padding: 6px;
+        border-radius: 4px;
+        font-size: 17px;
+        box-sizing: border-box;
+        text-align: right;
+    }
+
+
+    .input-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column; /* ← 横並びではなく縦にする */
+        gap: 4px;
+    }
+    .input-container input { flex: 1; }
     .input-container input { width:100%; border:2px solid #90caf9; background:#fff; padding:6px; border-radius:4px; font-size:17px; box-sizing:border-box; text-align:right; touch-action: manipulation; }
 
     button { padding:10px 20px; font-size:16px; margin-top:15px; cursor:pointer; }
@@ -61,6 +121,21 @@
     /* トースト */
     #toast { visibility:hidden; min-width:160px; background:#323232; color:#fff; text-align:center; border-radius:8px; padding:10px; position:fixed; z-index:2000; left:50%; bottom:40px; transform:translateX(-50%); font-size:16px; opacity:0; transition: opacity 0.4s, bottom 0.4s; }
     #toast.show { visibility:visible; opacity:0.95; bottom:60px; }
+
+    /* 商品名　C　ボタン */
+    .clear-btn {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 17px;    /* 商品名と同じサイズに */
+        padding: 6px 12px;  /* 高さと横幅をラベルに合わせる */
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+
 </style>
 </head>
 <body>
@@ -69,28 +144,54 @@
     <h2>汎用コスト計算</h2>
     <div class="sectionA">
         <div class="input-group">
+          <div class="label-with-clear">
             <label for="nameA">商品名</label>
-            <div class="input-container"><input type="text" id="nameA" placeholder="任意"></div>
+            <button id="clearName" type="button" class="clear-btn">Ｃ</button>
+          </div>
+          <div class="input-container">
+            <input type="text" id="nameA" placeholder="任意">
+          </div>
         </div>
         <div class="input-group">
+          <div class="label-with-clear">
             <label for="priceA">価　格</label>
-            <div class="input-container"><input type="number" id="priceA"></div>
+            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
+          </div>
+          <div class="input-container">
+            <input type="number" id="priceA">
+          </div>
         </div>
+
         <div class="input-group">
+          <div class="label-with-clear">
             <label for="volumeA">本体量</label>
-            <div class="input-container"><input type="number" id="volumeA"></div>
+            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
+          </div>
+          <div class="input-container">
+            <input type="number" id="volumeA">
+          </div>
         </div>
+
         <div class="input-group">
+          <div class="label-with-clear">
             <label for="usageA">使用量</label>
-            <div class="input-container"><input type="number" id="usageA" value="1"></div>
+            <button class="clear-btn" style="visibility:hidden; pointer-events:none;">Ｃ</button>
+          </div>
+          <div class="input-container">
+            <input type="number" id="usageA" value="1">
+          </div>
         </div>
+
     </div>
     <button id="calculate-btn">計算する</button>
     <div id="result"></div>
 </div>
 
 <div id="floatingCalc">
-    <div id="calcDisplay">0</div>
+    <div style="display:flex; align-items:center; margin-bottom:8px;">
+        <button id="powerOff" style="margin-right:8px; background:#f44336; color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">電消</button>
+        <div id="calcDisplay" style="flex:1; text-align:right; font-size:22px; font-weight:bold;">0</div>
+    </div>
     <div id="calcButtons">
         <button>７</button><button>８</button><button>９</button><button>÷</button>
         <button>４</button><button>５</button><button>６</button><button>×</button>
@@ -103,6 +204,7 @@
         <button id="apply">入力</button>
     </div>
 </div>
+
 
 <div id="logContainer">
     <div id="logHeader">
@@ -128,6 +230,7 @@
 <div id="toast" aria-live="polite" role="status">コピーしました</div>
 
 <div style="height:1000px;"></div>
+
 
 <script>
 /* -----------------------------
@@ -251,14 +354,14 @@ function applyToInput(){
 
     // ▼ 修正版：電卓に何も入力されていない場合
     if(!calcExpression.trim()){ 
-        // 既存の値はそのまま残し、式表示も更新しない
-        removeFormulaBelow(activeInput); 
+        // スキップ時は何も消さずに次の入力へ移動
         document.getElementById("floatingCalc").style.display = "none";
         const currentInput = activeInput;
         activeInput = null;
         moveToNextInput(currentInput);
         return;
     }
+
 
     if(!calcEvaluated) calculateExpression();
     if(calcEvaluated && !isNaN(calcResult)){ 
@@ -295,17 +398,16 @@ document.querySelectorAll('.sectionA input[type="number"]').forEach(input => {
     input.addEventListener('touchstart', e => {
         e.preventDefault();
         e.stopPropagation();
-        // iPhoneでは focus() を強制的に解除しておく
-        input.blur();
+        // input.blur(); // ← 削除
         showCalculator(input);
     });
 
     input.addEventListener('click', e => {
-        // clickでも念のため対応（PC用）
         e.preventDefault();
         showCalculator(input);
     });
 });
+
 
 
 
@@ -319,13 +421,22 @@ function adjustCalculatorPosition(){
 }
 
 function showFormulaBelow(input, expr, result){
-    let note=input.nextElementSibling;
-    if(!note||!note.classList.contains("formula-note")){
-        note=document.createElement('div'); note.className='formula-note'; input.parentNode.appendChild(note);
+    const container = input.closest('.input-container');
+    if(!container) return;
+
+    let note = container.querySelector('.formula-note');
+    if(!note){
+        note = document.createElement('div');
+        note.className = 'formula-note';
+        container.appendChild(note);  // input の下に追加される
     }
-    const normalized=normalizeExpression(expr);
-    note.textContent=/[+\-*/]/.test(normalized)?normalized.replace(/\*/g,'×').replace(/\//g,'÷')+` = ${result}`:result;
+    const normalized = normalizeExpression(expr);
+    note.textContent = /[+\-*/]/.test(normalized)
+        ? normalized.replace(/\*/g,'×').replace(/\//g,'÷') + ` = ${result}`
+        : result;
 }
+
+
 
 function removeFormulaBelow(input){
     const note=input.nextElementSibling; if(note&&note.classList.contains("formula-note")) note.remove();
@@ -445,6 +556,24 @@ document.querySelectorAll('.sectionA input').forEach(input => {
             input.blur(); // ← iPhoneでもキーボードを閉じる
         }
     });
+});
+// 商品名クリアボタン
+document.getElementById('clearName').addEventListener('click', () => {
+    const nameInput = document.getElementById('nameA');
+    nameInput.value = '';
+    nameInput.focus();
+
+    // もし式表示が残っている場合は削除
+    const note = nameInput.nextElementSibling;
+    if (note && note.classList.contains('formula-note')) note.remove();
+
+    showToast('商品名をクリアしました', '#c62828');
+});
+//電消　ボタン機能
+document.getElementById('powerOff').addEventListener('click', () => {
+    const calc = document.getElementById('floatingCalc');
+    calc.style.display = 'none';
+    activeInput = null; // 現在選択中の入力を解除
 });
 
 </script>
