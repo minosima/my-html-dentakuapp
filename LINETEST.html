@@ -596,43 +596,53 @@ document.getElementById('powerOff').addEventListener('click', () => {
     calc.style.display = 'none';
     activeInput = null; // 現在選択中の入力を解除
 });
-// === 自動保存・復元機能 ===
-
-// LocalStorageキー名（他ツールと被らないように独自名に）
+// === 設定ここから ===
 const STORAGE_KEY = "calcLogsBackup";
 
-// ログをLocalStorageに保存
+// LocalStorage 保存（端末保存）
 function saveLogsToLocalStorage() {
   const logs = Array.from(document.querySelectorAll('#calcLog .logText'))
                     .map(el => el.textContent);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  showToast("端末に保存しました", "#1976d2");
 }
 
-// LocalStorageから復元
+// LocalStorage から復元
 function loadLogsFromLocalStorage() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return;
-  const logs = JSON.parse(saved);
-  logs.forEach(text => addLog(text));
-}
-
-// ページ読み込み時に自動復元
-window.addEventListener('DOMContentLoaded', loadLogsFromLocalStorage);
-
-// ログ追加時に自動保存（addLogの最後に追記でもOK）
-function addLogWithSave(text) {
-  addLog(text);
-  saveLogsToLocalStorage();
-}
-
-// === バックアップダウンロード ===
-function downloadBackup() {
-  const logs = localStorage.getItem(STORAGE_KEY);
-  if (!logs) {
-    showToast("保存されたログがありません", "#ff5252");
+  if (!saved) {
+    document.getElementById('logContainer').style.display = 'none';
     return;
   }
-  const blob = new Blob([logs], { type: "application/json" });
+  const logs = JSON.parse(saved);
+  if (Array.isArray(logs) && logs.length > 0) {
+    logs.forEach(text => addLog(text));
+    document.getElementById('logContainer').style.display = 'block';
+  } else {
+    document.getElementById('logContainer').style.display = 'none';
+  }
+}
+
+// ページ読み込み時に復元
+window.addEventListener('DOMContentLoaded', loadLogsFromLocalStorage);
+
+// 「コピー」ボタンで端末保存
+document.getElementById('copyAllLogs').addEventListener('click', ()=>{
+  const logs = Array.from(document.querySelectorAll('#calcLog .logText'))
+                    .map(sp=>sp.textContent)
+                    .join('\n');
+  copyTextToClipboard(logs);
+  saveLogsToLocalStorage(); // ←ここで保存
+});
+
+// === バックアップ保存（JSONダウンロード） ===
+function downloadBackup() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved || saved === "[]") {
+    showToast("保存されたバックアップがありません", "#ff5252");
+    return;
+  }
+  const blob = new Blob([saved], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -660,14 +670,32 @@ function restoreBackup(event) {
 
       // LocalStorageにも反映
       localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-
-      showToast("バックアップを復元しました", "#00c853");
+      document.getElementById("logContainer").style.display = "block";
+      showToast("バックアップを復元しました", "#00bcd4");
     } catch (err) {
-      showToast("復元に失敗しました（ファイル形式エラー）", "#ff5252");
+      showToast("復元に失敗しました", "#ff5252");
     }
   };
   reader.readAsText(file);
 }
+
+// === 全体削除（確認付き） ===
+document.getElementById('clearAllLogs').addEventListener('click', ()=>{
+  document.getElementById('customConfirmModal').style.display = 'block';
+});
+
+document.getElementById('confirmNo').addEventListener('click', ()=>{
+  document.getElementById('customConfirmModal').style.display = 'none';
+});
+
+document.getElementById('confirmYes').addEventListener('click', ()=>{
+  document.getElementById('calcLog').innerHTML = '';
+  document.getElementById('logContainer').style.display = 'none';
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById('customConfirmModal').style.display = 'none';
+  showToast("すべて削除しました", "red");
+});
+
 
 
 </script>
