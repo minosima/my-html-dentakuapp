@@ -637,7 +637,7 @@ function downloadBackup() {
   URL.revokeObjectURL(url);
   showToast("バックアップをダウンロードしました", "#00c853");
 }
-<script>
+
 // === バックアップ復元 ===
 function restoreBackup(event) {
   const file = event.target.files[0];
@@ -664,7 +664,7 @@ function restoreBackup(event) {
   };
   reader.readAsText(file);
 }
-</script>
+
 
 </script>
 </body>
